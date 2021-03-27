@@ -6,6 +6,13 @@ from dorei.models import *
 from django.contrib import messages
 from django.db import connection
 
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as djlogin
+from django.contrib.auth import logout as djlogout
+
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User as djUser
+
 from datetime import datetime
 
 from django.urls import reverse
@@ -56,7 +63,10 @@ def logIn_user(request):
             for user in results:
                 if user['password'] == request.POST.get("password"):
                     #return render(request, 'user_ui.html', {'current_user':user['user_id']})
-                    return redirect(reverse('transaction', kwargs={"user_id": user['user_id']}))
+                    login_user = authenticate(request,username=user['user_id'], password=user['password'])
+                    djlogin(request, login_user)
+                    #return redirect(reverse('transaction', kwargs={"user_id": user['user_id']}))
+                    return redirect(reverse('transaction'))
         else:
             messages.error(request, 'Email id or password does not match!')
             
@@ -69,22 +79,9 @@ def signUp(request):
 
     if request.method == "POST":
         results = select_using_raw_sql("SELECT * FROM dorei_user")
-        #print(results)
         print("Working.....")
-        count = 0
-        for user in results:
-            if user['email_address'] == request.POST.get("email"):
-                messages.error(request, 'This email address has been taken!')
-                return render(request, 'SignUp.html') 
+        print(results)
 
-            count = count + 1
-
-        if request.POST.get("password") != request.POST.get("repeat_password"):
-            messages.error(request, 'Password does not match!')
-            return render(request, 'SignUp.html')
-
-
-        UserId = count+1
         FirstName = request.POST.get("first_name")
         MiddleName = request.POST.get("middle_name")
         LastName = request.POST.get("last_name")
@@ -97,45 +94,64 @@ def signUp(request):
         PostalCode = request.POST.get("zipcode")
         Password = request.POST.get("password")
 
-        if len(HouseNo) == 0:
-            HouseNo = 'NULL'
-        if len(StreetNo) == 0:
-            StreetNo = 'NULL'
-        if len(MiddleName) == 0:
-            MiddleName = 'NULL'
-        if len(LastName) == 0:
-            LastName = 'NULL'
+        if User.objects.filter(email_address__exact=Email).exists():
+            messages.error(request, 'This email address has been taken!')
+            return render(request, 'SignUp.html') 
 
-        #print(type(UserId),type(FirstName),type(Email),type(HouseNo),type(StreetName),type(City),type(PostalCode),type(Password))
+        if request.POST.get("password") != request.POST.get("repeat_password"):
+            messages.error(request, 'Password does not match!')
+            return render(request, 'SignUp.html')
 
-        i = "dorei_user(user_id,postal_code,first_name,middle_name,last_name,email_address,house_number,street_number,street_name,city,state,password)"
-        j = "values("+str(UserId)+","+str(PostalCode)+",'"+str(FirstName)+"',"+str(MiddleName)+","+str(LastName)+",'"+str(Email)+"',"+str(HouseNo)+","+str(StreetNo)+",'"+str(StreetName)+"','"+str(City)+"','"+str(State)+"','"+str(Password)+"')"
+        '''i = "dorei_user(postal_code,first_name,middle_name,last_name,email_address,house_number,street_number,street_name,city,state,password)"
+        j = "values("+str(PostalCode)+",'"+str(FirstName)+"','"+str(MiddleName)+"','"+str(LastName)+"','"+str(Email)+"','"+str(HouseNo)+"','"+str(StreetNo)+"','"+str(StreetName)+"','"+str(City)+"','"+str(State)+"','"+str(Password)+"')"
         
 
         command = "INSERT INTO " + i +" "+ j
         if insert_using_raw_sql(command):
             # insert phone number
+            my_dict = select_using_raw_sql("SELECT du.user_id,du.password FROM dorei_user AS du WHERE du.email_address='" + str(Email) + "'")
+            print(my_dict)
+
+            new_user = djUser.objects.create_user(
+                    username=my_dict[0]['user_id'] , password=my_dict[0]['password']
+                )
             messages.success(request, 'Your account has been created successfully!')
-            # return render(request, 'logInUser.html')
             return redirect('/dorei/logInUser/')
         else:
             messages.error(request, 'Internal error! Try again.')
-            #return render(request, 'SignUp.html')  
-            return redirect('/dorei/signUp/')
+            return redirect('/dorei/signUp/')'''
 
-        # user = User.objects.create(user_id=UserId, email_address=Email, first_name=FirstName, middle_name=MiddleName,
-        #                            last_name=LastName, house_number=HouseNo, street_number=StreetNo, street_name=StreetName, 
-        #                            city=City, state=State, postal_code=PostalCode, password=Password)
-        # messages.success(request, 'Your account has been created successfully!')
-        # return render(request, 'logInUser.html')
+        try :
+            user = User.objects.create(email_address=Email, first_name=FirstName, middle_name=MiddleName,
+                last_name=LastName, house_number=HouseNo, street_number=StreetNo, street_name=StreetName, 
+                city=City, state=State, postal_code=PostalCode, password=Password)
+
+            my_dict = select_using_raw_sql("SELECT du.user_id,du.password FROM dorei_user AS du WHERE du.email_address='" + str(Email) + "'")
+            print(my_dict)
+
+            new_user = djUser.objects.create_user(
+                    username=my_dict[0]['user_id'] , password=my_dict[0]['password']
+                )
+        except Exception as e:
+                print(e)
+                messages.error(request, 'Internal error! Try again.')
+                return redirect('/dorei/signUp/')
+        messages.success(request, 'Your account has been created successfully!')
+        return render(request, 'logInUser.html')
 
     else:
         return render(request, 'SignUp.html')
 
+@login_required()
 def signOut(request):
+    djlogout(request)
     return redirect('/dorei/logInUser/')
 
-def transaction(request, user_id):
+
+@login_required()
+def transaction(request):
+
+    user_id = request.user
 
     total_charity = select_using_raw_sql("SELECT SUM(dm.amount) FROM dorei_money AS dm")
     
@@ -170,7 +186,10 @@ def transaction(request, user_id):
         }
     return render(request, 'user_ui.html', data)
 
-def donate_money(request, user_id):
+@login_required()
+def donate_money(request):
+
+    user_id = request.user
 
     if request.method == "POST":
         MoneyId = Money.objects.all().count() + 1
@@ -193,8 +212,10 @@ def donate_money(request, user_id):
         
     return render(request, 'donate_money.html', {'user_id':user_id})
 
-def donate_book(request, user_id):
+@login_required()
+def donate_book(request):
 
+    user_id = request.user
     if request.method == "POST":
         Isbn = Book.objects.all().count() + 1
         Author = request.POST.get("author")
@@ -229,7 +250,11 @@ def donate_book(request, user_id):
             messages.error(request, 'Internal error! Try again.')
     return render(request, 'donate_book.html', {'user_id':user_id})
 
-def donate_stationery(request, user_id):
+@login_required()
+def donate_stationery(request):
+
+    user_id = request.user
+    
     if request.method == "POST":
         StationeryId = Stationery.objects.all().count() + 1
         StationeryName = request.POST.get("stationery_name")

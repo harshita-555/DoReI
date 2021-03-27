@@ -12,7 +12,7 @@
       <div class="row justify-content-center">
         <div class="col-md-6 col-lg-4">
           <div class="login-wrap p-0">
-            <form action="{% url 'donate_stationery' user_id=user_id%}" method="POST" class="signin-form">
+            <form action="{% url 'donate_stationery' %}" method="POST" class="signin-form">
               {% csrf_token %}
               <div class="form-group">
                 <select type="text" name="stationery_name" class="form-control" placeholder="Category" required>
