@@ -5,8 +5,19 @@
   <section class="ftco-section">
     <div class="container">
       <div class="row justify-content-center">
+        {% if messages %}
+                <div align="middle" >
+                    {% for message in messages %}
+                        {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                            <h3 style="color: green;align-self: center;margin-bottom: 5px;">{{ message }}</h3>
+                        {% else %}
+                            <h3 style="color: red;margin-bottom: 5px;">{{ message }}</h3>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
         <div class="col-md-6 text-center mb-5">
-          <h2 class="heading-section">Your user id : {{id}}</h2>
+          <h2 class="heading-section">Hello {{id}}!</h2>
         </div>
       </div>
       <div class="row justify-content-center">

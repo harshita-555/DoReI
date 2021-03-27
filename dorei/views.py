@@ -72,10 +72,58 @@ def logIn_user(request):
             
     return render(request, 'logInUser.html')
 
+
 def logIn_manager(request):
+    #djlogout(request)
+
+    if request.method == "POST":
+        print("hiiii")
+        email = request.POST.get("email")
+        print("hi")
+        results = select_using_raw_sql("SELECT dm.email_address,dm.password FROM dorei_manager AS dm WHERE dm.email_address='" + str(email) + "'")
+        print(results,email)
+        if results:
+            for user in results:
+                if user['password'] == request.POST.get("password"):
+                    login_user = authenticate(request,username=user['email_address'], password=user['password'])
+                    djlogin(request, login_user)
+                    return redirect(reverse('manage'))
+        else:
+            messages.error(request, 'Email id or password does not match!')
+
     return render(request, 'logInManager.html')
 
+@login_required()
+def manage(request):
+
+    total_charity = select_using_raw_sql("SELECT SUM(dm.amount) FROM dorei_money AS dm")
+
+    books_donated = select_using_raw_sql("SELECT COUNT(db.isbn) FROM dorei_bookdonate AS db WHERE db.is_collected=1")
+    stationery_donated = select_using_raw_sql("SELECT SUM(ds.quantity) FROM dorei_stationerydonate AS ds WHERE ds.is_collected=1")
+
+    book_donors = select_using_raw_sql("SELECT COUNT(DISTINCT(db.user_id)) FROM dorei_bookdonate AS db WHERE db.is_collected=1")
+    stationery_donors = select_using_raw_sql("SELECT SUM(ds.user_id) FROM dorei_stationerydonate AS ds WHERE ds.is_collected=1")
+
+
+    pending_book_requests = select_using_raw_sql("SELECT dbd.user_id AS user, dbd.isbn AS isbn, dbd.t_time AS t_time FROM dorei_bookdonate  AS dbd WHERE dbd.is_collected = 0")
+    pending_statinery_requests = select_using_raw_sql("SELECT dsd.user_id AS user, dsd.stationery_id AS stationery, dsd.t_time AS t_time, dsd.quantity AS quantity  FROM dorei_bookdonate  AS dsd WHERE dsd.is_collected = 0")
+
+
+    data = {
+            'charity':total_charity[0]['SUM(dm.amount)'],
+            'books_donated':books_donated[0]['COUNT(db.isbn)'],
+            'stationery_donated':stationery_donated[0]['SUM(ds.quantity)'],
+            'book_donors':book_donors[0]['COUNT(DISTINCT(db.user_id))'],
+            'stationery_donors':stationery_donors[0]['SUM(ds.user_id)'],
+            'pending_book_requests':pending_book_requests,
+            'pending_statinery_requests':pending_statinery_requests,
+        }
+    return render(request, 'manager_ui.html', data)
+
+
 def signUp(request):
+
+    djlogout(request)
 
     if request.method == "POST":
         results = select_using_raw_sql("SELECT * FROM dorei_user")
@@ -152,6 +200,7 @@ def signOut(request):
 def transaction(request):
 
     user_id = request.user
+    username = select_using_raw_sql("SELECT first_name FROM dorei_user as du WHERE du.user_id = "+ str(user_id))
 
     total_charity = select_using_raw_sql("SELECT SUM(dm.amount) FROM dorei_money AS dm")
     
@@ -175,7 +224,7 @@ def transaction(request):
     print(json.dumps(results,indent=4))
 
     data = {
-            'id':user_id,
+            'id':username[0]['first_name'],
             'charity':total_charity[0]['SUM(dm.amount)'],
             'books_donated':books_donated[0]['COUNT(db.isbn)'],
             'stationery_donated':stationery_donated[0]['SUM(ds.quantity)'],
@@ -206,17 +255,23 @@ def donate_money(request):
             results = select_using_raw_sql("SELECT * FROM dorei_money")
             print(json.dumps(results,indent=4))
             messages.success(request, 'Thank you for donating money.')
-            return redirect(reverse('transaction', kwargs={"user_id":user_id}))
+            return redirect(reverse('transaction'))
         else:
             messages.error(request, 'Internal error! Try again.')
         
-    return render(request, 'donate_money.html', {'user_id':user_id})
+    return render(request, 'donate_money.html')
 
 @login_required()
 def donate_book(request):
 
     user_id = request.user
     if request.method == "POST":
+
+        system_messages = messages.get_messages(request)
+        for message in system_messages:
+            del message
+
+
         Isbn = Book.objects.all().count() + 1
         Author = request.POST.get("author")
         Subject = request.POST.get("subject")
@@ -245,10 +300,10 @@ def donate_book(request):
             print(json.dumps(results,indent=4))
 
             messages.success(request, 'Thank you for donating Book(s).')
-            return redirect(reverse('transaction', kwargs={"user_id":user_id}))
+            return redirect(reverse('transaction'))
         else:
             messages.error(request, 'Internal error! Try again.')
-    return render(request, 'donate_book.html', {'user_id':user_id})
+    return render(request, 'donate_book.html')
 
 @login_required()
 def donate_stationery(request):
@@ -281,10 +336,10 @@ def donate_stationery(request):
             print(json.dumps(results,indent=4))
 
             messages.success(request, 'Thank you for donating Item(s).')
-            return redirect(reverse('transaction', kwargs={"user_id":user_id}))
+            return redirect(reverse('transaction'))
         else:
             messages.error(request, 'Internal error! Try again.')
-    return render(request, 'donate_stationery.html', {'user_id':user_id})
+    return render(request, 'donate_stationery.html')
 
 def request(request):
     return render(request, 'request.html')

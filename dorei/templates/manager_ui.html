@@ -5,11 +5,66 @@
   <section class="ftco-section">
     <div class="container">
       <div class="row justify-content-center">
-          
-          <div class="col form-group">
-            <button type="submit" class="form-control btn btn-primary submit px-3">Sign Out</button>
-          </div>
+        <div class="col-md-6 text-center mb-5">
+          <h2 class="heading-section">Manager page</h2>
+        </div>
       </div>
+
+      <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+          <h2 class="heading-section">Total Charity : {{charity}}</h2>
+          <h2 class="heading-section">Total No. of Books Donated Till Now : {{books_donated}}</h2>
+          <h2 class="heading-section">Total No. of Book Donors : {{book_donors}}</h2>
+          <h2 class="heading-section">Total No. of Stationery items Donated Till Now : {{stationery_donated}}</h2>
+          <h2 class="heading-section">Total No. of Stationery Donors : {{stationery_donors}}</h2>
+        </div>
+      </div>
+
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+          <h2 class="heading-section"><u>Pending Book Requests</u></h2>
+        </div>
+    </div>
+
+    <table style="width:100%">
+      <tr class="heading-section" style="color:#FFB6C1;">
+        <th>User ID</th>
+        <th>ISBN</th>
+        <th>Date & Time of Donation</th>
+      </tr>
+      {% for pending in pending_book_requests %}
+      <tr class="heading-section" style="color:#FFFFFF">
+        <td >{{pending.user}}</td>
+        <td >{{pending.isbn}}</td>
+        <td >{{pending.t_time}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+          <h2 class="heading-section"><u>Pending Statinery Requests</u></h2>
+        </div>
+    </div>
+
+    <table style="width:100%">
+      <tr class="heading-section" style="color:#FFB6C1;">
+        <th>User ID</th>
+        <th>Stationery ID</th>
+        <th>Date & Time of Donation</th>
+        <th>Quantity</th>
+      </tr>
+      {% for pending in pending_statinery_requests %}
+      <tr class="heading-section" style="color:#FFFFFF">
+        <td >{{pending.user}}</td>
+        <td >{{pending.stationery}}</td>
+        <td >{{pending.t_time}}</td>
+        <td >{{pending.quantity}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+
     </div>
   </section>
   </body>

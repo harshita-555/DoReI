@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import RegexValidator
 from django.urls import reverse # Used to generate URLs by reversing the URL patterns
 
 class Location(models.Model):
@@ -41,6 +42,20 @@ class User(models.Model):
         """String for representing the Model object."""
         return self.email_address
 
+class Manager(models.Model):
+    manager_id = models.AutoField(db_column='user_id', primary_key=True)
+    first_name = models.TextField(db_column='first_name', max_length=10)
+    middle_name = models.TextField(db_column='middle_name', max_length=10, blank=True, null=True)
+    last_name = models.TextField(db_column='last_name', max_length=10, blank=True, null=True)
+    email_address = models.EmailField(db_column='email_address', max_length=40) 
+    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.") #############look into regex
+    phone = models.CharField(validators=[phone_regex],max_length=15,blank = True) 
+    password = models.CharField(db_column='password', max_length=256) 
+
+    def __str__(self):
+        """String for representing the Model object."""
+        return self.email_address
+
 class BookDonate(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
     isbn = models.ForeignKey(Book, on_delete=models.CASCADE, db_column='isbn')
@@ -71,7 +86,7 @@ class Money(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
     t_time = models.DateTimeField(db_column='t_time')
     amount = models.IntegerField(db_column='amount')
-    transaction_id = models.TextField(db_column='transaction_id', max_length=10, null=True)  
+    transaction_id = models.CharField(db_column='transaction_id', max_length=10, null=True)  
 
     class Meta:
         unique_together = (('money_id', 't_time'),)

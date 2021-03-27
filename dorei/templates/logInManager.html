@@ -1,5 +1,4 @@
 {% extends "base_generic.html" %}
-
 {% block content %}
   <body class="img js-fullheight" style="background-color: #928DAB;">
   <section class="ftco-section">
@@ -13,12 +12,24 @@
         <div class="col-md-6 col-lg-4">
           <div class="login-wrap p-0">
             <h3 class="mb-4 text-center">Log In to Manage !!</h3>
-            <form action="#" class="signin-form">
+            {% if messages %}
+                <div align="middle" >
+                    {% for message in messages %}
+                        {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                            <h3 style="color: green;align-self: center;margin-bottom: 5px;">{{ message }}</h3>
+                        {% else %}
+                            <h3 style="color: red;margin-bottom: 5px;">{{ message }}</h3>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <form action="/dorei/logInSupervised/" method="POST" class="signin-form">
+              {% csrf_token %}
               <div class="form-group">
-                <input type="text" class="form-control" placeholder="Email address" required>
+                <input type="text" name="email" class="form-control" placeholder="Email address" required>
               </div>
               <div class="form-group">
-                <input id="password-field" type="password" class="form-control" placeholder="Password" required>
+                <input id="password-field" name="password" type="password" class="form-control" placeholder="Password" required>
                 <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
               </div>
               <div class="form-group">
@@ -33,3 +44,17 @@
   </body>
 
 {% endblock %}
+
+<!--<form action="/dorei/logInUser/" method="POST" class="signin-form">
+              
+              <div class="form-group">
+                <input type="text" name="email" class="form-control" placeholder="Email address" required>
+              </div>
+              <div class="form-group">
+                <input id="password-field" name="password" type="password" class="form-control" placeholder="Password" required>
+                <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+              </div>
+              <div class="form-group">
+                <button type="submit" class="form-control btn btn-primary submit px-3">Sign In</button>
+              </div>
+            </form>-->
