@@ -12,7 +12,7 @@
 
       <div class="row justify-content-center">
         <div class="col-md-6 text-center mb-5">
-          <h2 class="heading-section">Total Charity : {{charity}}</h2>
+          <h2 class="heading-section">Total Charity : {{total_charity}}</h2>
           <h2 class="heading-section">Total No. of Books Donated Till Now : {{books_donated}}</h2>
           <h2 class="heading-section">Total No. of Book Donors : {{book_donors}}</h2>
           <h2 class="heading-section">Total No. of Stationery items Donated Till Now : {{stationery_donated}}</h2>
@@ -51,7 +51,7 @@
     <table style="width:100%">
       <tr class="heading-section" style="color:#FFB6C1;">
         <th>User ID</th>
-        <th>Stationery ID</th>
+        <th>Stationery Name</th>
         <th>Date & Time of Donation</th>
         <th>Quantity</th>
       </tr>
@@ -64,6 +64,65 @@
       </tr>
       {% endfor %}
     </table>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+          <h2 class="heading-section"><u>Stationery Statistics</u></h2>
+        </div>
+    </div>
+
+    <table style="width:100%">
+      <tr class="heading-section" style="color:#FFB6C1;">
+        <th>Stationery ID</th>
+        <th>Stationery Name</th>
+        <th>Total Quantity</th>
+      </tr>
+      {% for stationery in stationery_stats %}
+      <tr class="heading-section" style="color:#FFFFFF">
+        <td >{{stationery.stationery_id}}</td>
+        <td >{{stationery.stationery_name}}</td>
+        <td >{{stationery.tot_quantity}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+          <h2 class="heading-section"><u>Stationery Statistics</u></h2>
+        </div>
+    </div>
+
+    <table style="width:100%">
+      <tr class="heading-section" style="color:#FFB6C1;">
+        <th>Stationery Name</th>
+        <th>Total Donations made to us</th>
+      </tr>
+      {% for stationery in stationery_donation_stats %}
+      <tr class="heading-section" style="color:#FFFFFF">
+        <td >{{stationery.stationery_name}}</td>
+        <td >{{stationery.total_donated}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <!--<div class="row justify-content-center">
+        <div class="col-md-6 text-center mb-5">
+          <h2 class="heading-section"><u>Stationery Statistics</u></h2>
+        </div>
+    </div>
+
+    <table style="width:100%">
+      <tr class="heading-section" style="color:#FFB6C1;">
+        <th>Stationery Name</th>
+        <th>Total Requests Given Away</th>
+      </tr>
+      {% for stationery in stationery_request_stats %}
+      <tr class="heading-section" style="color:#FFFFFF">
+        <td >{{stationery.stationery_name}}</td>
+        <td >{{stationery.total_requests}}</td>
+      </tr>
+      {% endfor %}
+    </table>-->
 
     </div>
   </section>

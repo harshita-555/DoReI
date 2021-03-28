@@ -29,14 +29,14 @@ class User(models.Model):
     first_name = models.TextField(db_column='first_name', max_length=10)
     middle_name = models.TextField(db_column='middle_name', max_length=10, blank=True, null=True)
     last_name = models.TextField(db_column='last_name', max_length=10, blank=True, null=True)
-    email_address = models.EmailField(db_column='email_address', max_length=40)  
-    house_number = models.CharField(db_column='house_number', max_length=10, blank=True, null=True) 
-    street_number = models.CharField(db_column='street_number', max_length=10, blank=True, null=True)  
-    street_name = models.TextField(db_column='street_name', max_length=50)   
-    city = models.TextField(db_column='city', max_length=50)  
-    state = models.TextField(db_column='state', max_length=50)  
-    postal_code = models.DecimalField(db_column='postal_code', max_digits=6, decimal_places=0) 
-    password = models.CharField(db_column='password', max_length=256) 
+    email_address = models.EmailField(db_column='email_address', max_length=40)
+    house_number = models.CharField(db_column='house_number', max_length=10, blank=True, null=True)
+    street_number = models.CharField(db_column='street_number', max_length=10, blank=True, null=True)
+    street_name = models.TextField(db_column='street_name', max_length=50)
+    city = models.TextField(db_column='city', max_length=50)
+    state = models.TextField(db_column='state', max_length=50)
+    postal_code = models.DecimalField(db_column='postal_code', max_digits=6, decimal_places=0)
+    password = models.CharField(db_column='password', max_length=256)
 
     def __str__(self):
         """String for representing the Model object."""
@@ -47,10 +47,10 @@ class Manager(models.Model):
     first_name = models.TextField(db_column='first_name', max_length=10)
     middle_name = models.TextField(db_column='middle_name', max_length=10, blank=True, null=True)
     last_name = models.TextField(db_column='last_name', max_length=10, blank=True, null=True)
-    email_address = models.EmailField(db_column='email_address', max_length=40) 
+    email_address = models.EmailField(db_column='email_address', max_length=40)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.") #############look into regex
-    phone = models.CharField(validators=[phone_regex],max_length=15,blank = True) 
-    password = models.CharField(db_column='password', max_length=256) 
+    phone = models.CharField(validators=[phone_regex],max_length=15,blank = True)
+    password = models.CharField(db_column='password', max_length=256)
 
     def __str__(self):
         """String for representing the Model object."""
@@ -82,11 +82,11 @@ class StationeryDonate(models.Model):
         unique_together = (('user_id', 'stationery_id','t_time'),)
 
 class Money(models.Model):
-    money_id = models.AutoField(db_column='money_id', primary_key=True)  
+    money_id = models.AutoField(db_column='money_id', primary_key=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
     t_time = models.DateTimeField(db_column='t_time')
     amount = models.IntegerField(db_column='amount')
-    transaction_id = models.CharField(db_column='transaction_id', max_length=10, null=True)  
+    transaction_id = models.CharField(db_column='transaction_id', max_length=10, null=True)
 
     class Meta:
         unique_together = (('money_id', 't_time'),)
