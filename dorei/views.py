@@ -29,6 +29,16 @@ def insert_using_raw_sql(sql):
         print(e)
         return False
 
+def update_using_raw_sql(sql):
+    print('sql - ', sql)
+    cursor = connection.cursor()
+    try:
+        cursor.execute(sql)
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
 def select_using_raw_sql(sql):
     print('sql - ', sql)
     cursor = connection.cursor()
@@ -107,11 +117,12 @@ def manage(request):
     #stationery_receivers = select_using_raw_sql("SELECT SUM(ds.user_id) FROM dorei_stationeryrequest AS ds WHERE ds.is_delivered=1")
 
     stationery_stats = select_using_raw_sql("SELECT ds.stationery_id AS stationery_id, ds.stationery_name AS stationery_name, ds.tot_quantity AS tot_quantity FROM dorei_stationery AS ds")
-    stationery_donation_stats = select_using_raw_sql("SELECT ds.stationery_name AS stationery_name, SUM(dsd.quantity) AS total_donated FROM dorei_stationery AS ds, dorei_stationerydonate as dsd WHERE ds.stationery_id=dsd.stationery_id AND dsd.is_collected=1 GROUP BY ds.stationery_id, ds.stationery_name")
+    stationery_donation_stats = select_using_raw_sql("SELECT ds.stationery_id AS stationery_id, ds.stationery_name AS stationery_name, SUM(dsd.quantity) AS total_donated FROM dorei_stationery AS ds, dorei_stationerydonate as dsd WHERE ds.stationery_id=dsd.stationery_id AND dsd.is_collected=1 GROUP BY ds.stationery_id, ds.stationery_name")
     #stationery_request_stats = select_using_raw_sql("SELECT ds.stationery_name AS stationery_name, SUM(dsd.quantity) AS total_requests FROM dorei_stationery AS ds, dorei_stationeryrequest as dsd WHERE ds.stationery_id=dsd.stationery_id AND dsd.is_delivered=1 GROUP BY ds.stationery_id, ds.stationery_name")
+    print(stationery_donation_stats)
 
     pending_book_requests = select_using_raw_sql("SELECT dbd.user_id AS user, dbd.isbn AS isbn, dbd.t_time AS t_time FROM dorei_bookdonate  AS dbd WHERE dbd.is_collected <> 1")
-    pending_statinery_requests = select_using_raw_sql("SELECT dsd.user_id AS user, ds.stationery_name AS stationery, dsd.t_time AS t_time, dsd.quantity AS quantity  FROM dorei_stationerydonate AS dsd, dorei_stationery AS ds WHERE ds.stationery_id=dsd.stationery_id AND dsd.is_collected <> 1")
+    pending_statinery_requests = select_using_raw_sql("SELECT dsd.user_id AS user, ds.stationery_id AS stationery, dsd.t_time AS t_time, dsd.quantity AS quantity  FROM dorei_stationerydonate AS dsd, dorei_stationery AS ds WHERE ds.stationery_id=dsd.stationery_id AND dsd.is_collected <> 1")
 
     data = {
             'total_charity':total_charity[0]['SUM(dm.amount)'],
@@ -130,6 +141,19 @@ def manage(request):
             'pending_statinery_requests':pending_statinery_requests,
         }
     return render(request, 'manager_ui.html', data)
+
+def approve_book_donation(request, user_id, isbn):
+    command = "UPDATE dorei_bookdonate SET is_collected=1 WHERE user_id="+str(user_id)+" AND isbn="+str(isbn)
+    update_using_raw_sql(command)
+    return redirect('/dorei/manage/')
+
+def approve_stationery_donation(request, user_id, stationery_id, t_time, quantity):
+    print(t_time)
+    command1 = "UPDATE dorei_stationerydonate SET is_collected=1 WHERE user_id="+str(user_id)+" AND stationery_id="+str(stationery_id)+" AND t_time=\""+str(t_time)+"\""
+    command2 = "UPDATE dorei_stationery SET tot_quantity=tot_quantity+"+str(quantity)+" WHERE stationery_id="+str(stationery_id)
+    update_using_raw_sql(command1)
+    update_using_raw_sql(command2)
+    return redirect('/dorei/manage/')
 
 
 def signUp(request):

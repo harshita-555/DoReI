@@ -32,28 +32,38 @@
         <th>User ID</th>
         <th>ISBN</th>
         <th>Date & Time of Donation</th>
+        <th>Approve Donation</th>
       </tr>
       {% for pending in pending_book_requests %}
       <tr class="heading-section" style="color:#FFFFFF">
         <td >{{pending.user}}</td>
         <td >{{pending.isbn}}</td>
         <td >{{pending.t_time}}</td>
+        <td>
+          <a href="{% url 'approve_book_donation' user_id=pending.user isbn=pending.isbn%}">
+            <button type="submit" class="form-control btn btn-primary submit px-3">Approve
+            </button>
+          </a>
+        </td>
       </tr>
       {% endfor %}
     </table>
 
+
+
     <div class="row justify-content-center">
         <div class="col-md-6 text-center mb-5">
-          <h2 class="heading-section"><u>Pending Statinery Requests</u></h2>
+          <h2 class="heading-section"><u>Pending Stationery Requests</u></h2>
         </div>
     </div>
 
     <table style="width:100%">
       <tr class="heading-section" style="color:#FFB6C1;">
         <th>User ID</th>
-        <th>Stationery Name</th>
+        <th>Stationery ID</th>
         <th>Date & Time of Donation</th>
         <th>Quantity</th>
+        <th>Approve Donation</th>
       </tr>
       {% for pending in pending_statinery_requests %}
       <tr class="heading-section" style="color:#FFFFFF">
@@ -61,6 +71,12 @@
         <td >{{pending.stationery}}</td>
         <td >{{pending.t_time}}</td>
         <td >{{pending.quantity}}</td>
+        <td>
+          <a href="{% url 'approve_stationery_donation' user_id=pending.user stationery_id=pending.stationery t_time=pending.t_time quantity=pending.quantity %}">
+            <button type="submit" class="form-control btn btn-primary submit px-3">Approve
+            </button>
+          </a>
+        </td>
       </tr>
       {% endfor %}
     </table>
@@ -88,17 +104,19 @@
 
     <div class="row justify-content-center">
         <div class="col-md-6 text-center mb-5">
-          <h2 class="heading-section"><u>Stationery Statistics</u></h2>
+          <h2 class="heading-section"><u>Stationery Donation Statistics</u></h2>
         </div>
     </div>
 
     <table style="width:100%">
       <tr class="heading-section" style="color:#FFB6C1;">
+        <th>Stationery ID</th>
         <th>Stationery Name</th>
         <th>Total Donations made to us</th>
       </tr>
       {% for stationery in stationery_donation_stats %}
       <tr class="heading-section" style="color:#FFFFFF">
+        <td >{{stationery.stationery_id}}</td>
         <td >{{stationery.stationery_name}}</td>
         <td >{{stationery.total_donated}}</td>
       </tr>
@@ -123,6 +141,9 @@
       </tr>
       {% endfor %}
     </table>-->
+
+
+
 
     </div>
   </section>
